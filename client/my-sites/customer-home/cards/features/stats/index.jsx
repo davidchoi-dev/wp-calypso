@@ -56,7 +56,9 @@ export const Stats = ( {
 					) }
 				</>
 			) }
-			<CardHeading>{ translate( 'Stats at a glance' ) }</CardHeading>
+			<CardHeading tagName="h2" size={ 16 }>
+				{ translate( 'Stats at a glance' ) }
+			</CardHeading>
 			<h6 className="stats__subheader">{ translate( 'Your site in the last week.' ) }</h6>
 			<div className="stats__data">
 				{ ! showInsights && (

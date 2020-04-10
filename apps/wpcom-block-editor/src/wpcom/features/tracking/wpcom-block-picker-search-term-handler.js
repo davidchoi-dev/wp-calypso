@@ -17,7 +17,11 @@ const trackSearchTerm = ( event, target ) => {
 		return;
 	}
 
-	tracksRecordEvent( 'wpcom_block_picker_search_term', { search_term } );
+	const context = 'inserter_menu';
+	tracksRecordEvent( 'wpcom_block_picker_search_term', {
+		search_term,
+		context,
+	} );
 
 	// Create a separate event for search with no results to make it easier to filter by them
 	const hasResults = document.querySelectorAll( '.block-editor-inserter__no-results' ).length === 0;
@@ -25,7 +29,10 @@ const trackSearchTerm = ( event, target ) => {
 		return;
 	}
 
-	tracksRecordEvent( 'wpcom_block_picker_no_results', { search_term } );
+	tracksRecordEvent( 'wpcom_block_picker_no_results', {
+		search_term,
+		context,
+	} );
 };
 
 /**

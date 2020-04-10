@@ -75,6 +75,8 @@ export class PlansStep extends Component {
 			cartItem,
 			// dependencies used only for 'plans-with-domain' step in Gutenboarding pre-launch flow
 			...( this.props.isGutenboarding && { isPreLaunch: true, isGutenboardingCreate: true } ),
+			// dependency used only for 'plans-plan-only' step in plan-only flow.
+			...( flowName === 'plan-only' && { isUpsellItem: true } ),
 		} );
 		this.props.goToNextStep();
 	};

@@ -254,7 +254,7 @@ export function generateSteps( {
 			stepName: 'plans-plan-only',
 			apiRequestFunction: addPlanToCart,
 			dependencies: [ 'siteSlug' ],
-			providesDependencies: [ 'cartItem' ],
+			providesDependencies: [ 'cartItem', 'isUpsellItem' ],
 			props: {
 				hideFreePlan: true,
 				planTypes: [ TYPE_PERSONAL, TYPE_PREMIUM ],

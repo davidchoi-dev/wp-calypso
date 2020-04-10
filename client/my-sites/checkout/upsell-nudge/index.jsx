@@ -36,7 +36,6 @@ import { ConciergeSupportSession } from './concierge-support-session';
 import { PlanUpgradeUpsell } from './plan-upgrade-upsell';
 import { PlanWithDomainUpgrade } from './plan-with-domain';
 import getUpgradePlanSlugFromPath from 'state/selectors/get-upgrade-plan-slug-from-path';
-import { hideUpsellNudge } from 'state/signup/upsell-nudge/actions';
 import { addQueryArgs } from 'lib/url';
 
 /**
@@ -179,11 +178,11 @@ export class UpsellNudge extends React.Component {
 		}
 	}
 
-	handleClickDecline = ( shouldHideUpsellNudges = true ) => {
+	handleClickDecline = ( shouldHideUpsellNudges = true, shouldEmptyCart = false ) => {
 		const { trackUpsellButtonClick, upsellType, handleCheckoutCompleteRedirect } = this.props;
 
 		trackUpsellButtonClick( `calypso_${ upsellType.replace( /-/g, '_' ) }_decline_button_click` );
-		handleCheckoutCompleteRedirect( shouldHideUpsellNudges );
+		handleCheckoutCompleteRedirect( shouldHideUpsellNudges, shouldEmptyCart );
 	};
 
 	getCheckoutUrl( url ) {
@@ -248,6 +247,5 @@ export default connect(
 	},
 	{
 		trackUpsellButtonClick,
-		hideUpsellNudge,
 	}
 )( localize( UpsellNudge ) );

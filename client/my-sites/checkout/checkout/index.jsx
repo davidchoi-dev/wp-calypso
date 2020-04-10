@@ -86,7 +86,6 @@ import PageViewTracker from 'lib/analytics/page-view-tracker';
 import isAtomicSite from 'state/selectors/is-site-automated-transfer';
 import getPreviousPath from 'state/selectors/get-previous-path.js';
 import getCurrentRoute from 'state/selectors/get-current-route.js';
-import { shouldHideUpsellNudge } from 'state/signup/upsell-nudge/selectors';
 import config from 'config';
 import { loadTrackingTool } from 'state/analytics/actions';
 import {
@@ -358,12 +357,8 @@ export class Checkout extends React.Component {
 		return true;
 	}
 
-	emptyCartIfDomainWithoutPlan() {
-		const { selectedSiteSlug, currentRoute } = this.props;
-
-		if ( currentRoute.includes( `/checkout/offer-plan-with-domain/${ selectedSiteSlug }` ) ) {
-			replaceCartWithItems( [] );
-		}
+	emptyOutCart() {
+		replaceCartWithItems( [] );
 	}
 
 	/**
@@ -478,7 +473,7 @@ export class Checkout extends React.Component {
 		}
 	}
 
-	getCheckoutCompleteRedirectPath = ( shouldHideUpsellNudges = false ) => {
+	getCheckoutCompleteRedirectPath = ( shouldHideUpsellNudges = false, shouldEmptyCart = false ) => {
 		// TODO: Cleanup and simplify this function.
 		// I wouldn't be surprised if it doesn't work as intended in some scenarios.
 		// Especially around the Concierge / Checklist logic.
@@ -564,7 +559,7 @@ export class Checkout extends React.Component {
 			return `${ signupDestination }/${ pendingOrReceiptId }`;
 		}
 
-		this.emptyCartIfDomainWithoutPlan();
+		shouldEmptyCart && this.emptyOutCart();
 
 		const redirectPathForConciergeUpsell = this.maybeRedirectToConciergeNudge(
 			pendingOrReceiptId,
@@ -594,7 +589,7 @@ export class Checkout extends React.Component {
 		window.location.href = redirectUrl;
 	}
 
-	handleCheckoutCompleteRedirect = ( shouldHideUpsellNudges = false ) => {
+	handleCheckoutCompleteRedirect = ( shouldHideUpsellNudges = false, shouldEmptyCart = false ) => {
 		let product, purchasedProducts, renewalItem;
 
 		const {
@@ -606,7 +601,10 @@ export class Checkout extends React.Component {
 			translate,
 		} = this.props;
 
-		const redirectPath = this.getCheckoutCompleteRedirectPath( shouldHideUpsellNudges );
+		const redirectPath = this.getCheckoutCompleteRedirectPath(
+			shouldHideUpsellNudges,
+			shouldEmptyCart
+		);
 		const destinationFromCookie = retrieveSignupDestination();
 
 		this.props.clearPurchases();
@@ -927,7 +925,6 @@ export default connect(
 			currentRoute: getCurrentRoute( state ),
 			isJetpackNotAtomic:
 				isJetpackSite( state, selectedSiteId ) && ! isAtomicSite( state, selectedSiteId ),
-			shouldHideUpsellNudge: shouldHideUpsellNudge( state ),
 		};
 	},
 	{

@@ -23,13 +23,11 @@ import { applySiteOffset } from 'lib/site/timezone';
 import { getSelectedSiteId } from 'state/ui/selectors';
 import { requestActivityLogs } from 'state/data-getters';
 import { withLocalizedMoment } from 'components/localized-moment';
-import ActivityCard from '../../components/activity-card';
 import ActivityCardList from 'landing/jetpack-cloud/components/activity-card-list';
 import BackupDelta from '../../components/backup-delta';
 import BackupUpsell from './components/upsell';
 import DailyBackupStatus from '../../components/daily-backup-status';
 import DatePicker from '../../components/date-picker';
-import Filterbar from 'my-sites/activity/filterbar';
 import getActivityLogFilter from 'state/selectors/get-activity-log-filter';
 import getDoesRewindNeedCredentials from 'state/selectors/get-does-rewind-need-credentials.js';
 import getIsRewindMissingPlan from 'state/selectors/get-is-rewind-missing-plan';
@@ -40,7 +38,6 @@ import getSiteGmtOffset from 'state/selectors/get-site-gmt-offset';
 import getSiteTimezoneValue from 'state/selectors/get-site-timezone-value';
 import Main from 'components/main';
 import MissingCredentialsWarning from '../../components/missing-credentials';
-import Pagination from 'components/pagination';
 import QueryRewindCapabilities from 'components/data/query-rewind-capabilities';
 import QueryRewindState from 'components/data/query-rewind-state';
 import QuerySitePurchases from 'components/data/query-site-purchases';
@@ -147,15 +144,16 @@ class BackupsPage extends Component {
 	};
 
 	renderMain() {
-		const { isRewindMissingPlan, siteId, siteSlug } = this.props;
+		const { isRewindMissingPlan, siteId, siteSlug, translate } = this.props;
 
 		return (
 			<Main>
-				<DocumentHead title="Backups" />
+				<DocumentHead title={ translate( 'Backups' ) } />
 				<SidebarNavigation />
 				<QueryRewindState siteId={ siteId } />
 				<QuerySitePurchases siteId={ siteId } />
 				<QuerySiteSettings siteId={ siteId } />
+				<QueryRewindCapabilities siteId={ siteId } />
 				{ isRewindMissingPlan ? <BackupUpsell siteSlug={ siteSlug } /> : this.renderBackupPicker() }
 			</Main>
 		);
@@ -188,14 +186,7 @@ class BackupsPage extends Component {
 		const hasRealtimeBackups = includes( siteCapabilities, 'backup-realtime' );
 
 		return (
-			<Main>
-				<DocumentHead title={ translate( 'Backups' ) } />
-				<SidebarNavigation />
-				<QueryRewindState siteId={ siteId } />
-				<QuerySitePurchases siteId={ siteId } />
-				<QuerySiteSettings siteId={ siteId } />
-				<QueryRewindCapabilities siteId={ siteId } />
-
+			<>
 				<DatePicker
 					onDateChange={ this.onDateChange }
 					selectedDate={ this.getSelectedDate() }
@@ -353,12 +344,12 @@ const mapStateToProps = state => {
 		gmtOffset,
 		indexedLog,
 		isLoadingBackups,
+		isRewindMissingPlan: getIsRewindMissingPlan( state, siteId ),
 		lastDateAvailable,
 		logs: logs?.data ?? [],
 		oldestDateAvailable,
 		rewind,
 		siteCapabilities,
-		siteGmtOffset,
 		siteId,
 		siteSlug: getSelectedSiteSlug( state ),
 		timezone,

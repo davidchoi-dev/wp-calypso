@@ -590,6 +590,7 @@ function shouldExcludeStep( stepName, fulfilledDependencies ) {
 		stepOptionalDependencies,
 		fulfilledDependencies
 	);
+
 	return isEmpty( dependenciesNotProvided );
 }
 

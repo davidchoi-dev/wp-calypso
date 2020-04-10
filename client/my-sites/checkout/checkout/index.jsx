@@ -85,6 +85,7 @@ import { isApplePayAvailable } from 'lib/web-payment';
 import PageViewTracker from 'lib/analytics/page-view-tracker';
 import isAtomicSite from 'state/selectors/is-site-automated-transfer';
 import getPreviousPath from 'state/selectors/get-previous-path.js';
+import getCurrentRoute from 'state/selectors/get-current-route.js';
 import config from 'config';
 import { loadTrackingTool } from 'state/analytics/actions';
 import {
@@ -356,6 +357,24 @@ export class Checkout extends React.Component {
 		return true;
 	}
 
+	isComingFromUpsell() {
+		const { previousRoute, selectedSiteSlug } = this.props;
+
+		return (
+			previousRoute.includes( `/checkout/${ selectedSiteSlug }/offer-plan-upgrade` ) ||
+			previousRoute.includes( `/checkout/offer-plan-with-domain/${ selectedSiteSlug }` ) ||
+			previousRoute.includes( `/start/plan-only` )
+		);
+	}
+
+	emptyCartIfDomainWithoutPlan() {
+		const { selectedSiteSlug, currentRoute } = this.props;
+
+		if ( currentRoute.includes( `/checkout/offer-plan-with-domain/${ selectedSiteSlug }` ) ) {
+			replaceCartWithItems( [] );
+		}
+	}
+
 	/**
 	 * Purchases are of the format { [siteId]: [ { productId: ... } ] }
 	 * so we need to flatten them to get a list of purchases
@@ -448,7 +467,7 @@ export class Checkout extends React.Component {
 			return;
 		}
 
-		const { cart, selectedSiteSlug, previousRoute } = this.props;
+		const { cart, selectedSiteSlug } = this.props;
 
 		// If the user has upgraded a plan from seeing our upsell (we find this by checking the previous route is /offer-plan-upgrade),
 		// then skip this section so that we do not show further upsells.
@@ -457,7 +476,7 @@ export class Checkout extends React.Component {
 			! hasConciergeSession( cart ) &&
 			! hasJetpackPlan( cart ) &&
 			( hasBloggerPlan( cart ) || hasPersonalPlan( cart ) || hasPremiumPlan( cart ) ) &&
-			! previousRoute.includes( `/checkout/${ selectedSiteSlug }/offer-plan-upgrade` )
+			! this.isComingFromUpsell()
 		) {
 			// A user just purchased one of the qualifying plans
 			// Show them the concierge session upsell page
@@ -556,6 +575,8 @@ export class Checkout extends React.Component {
 		if ( cart.create_new_blog ) {
 			return `${ signupDestination }/${ pendingOrReceiptId }`;
 		}
+
+		this.emptyCartIfDomainWithoutPlan();
 
 		const redirectPathForConciergeUpsell = this.maybeRedirectToConciergeNudge( pendingOrReceiptId );
 		if ( redirectPathForConciergeUpsell ) {
@@ -912,6 +933,7 @@ export default connect(
 			isSitePlansListFetching: isRequestingSitePlans( state, selectedSiteId ),
 			planSlug: getUpgradePlanSlugFromPath( state, selectedSiteId, props.product ),
 			previousRoute: getPreviousPath( state ),
+			currentRoute: getCurrentRoute( state ),
 			isJetpackNotAtomic:
 				isJetpackSite( state, selectedSiteId ) && ! isAtomicSite( state, selectedSiteId ),
 		};

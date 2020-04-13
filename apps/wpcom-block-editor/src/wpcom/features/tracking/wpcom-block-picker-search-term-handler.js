@@ -4,28 +4,26 @@
  * External dependencies
  */
 import { debounce } from 'lodash';
-
-/**
- * Internal dependencies
- */
-import tracksRecordEvent from './track-record-event';
+import { dispatch } from '@wordpress/data';
 
 const trackSearchTerm = ( event, target ) => {
-	const search_term = ( target.value || '' ).trim().toLowerCase();
+	const context = 'inserter_menu';
+	const { setSearchTerm, setSearchBlocks, setSearchBlocksNotFound } = dispatch( 'automattic/tracking' );
+	const searchTerm = ( target.value || '' ).trim().toLowerCase();
 
-	if ( search_term.length < 3 ) {
+	setSearchTerm( { searchTerm, context } );
+
+	if ( searchTerm.length < 3 ) {
 		return;
 	}
 
-	tracksRecordEvent( 'wpcom_block_picker_search_term', { search_term } );
+	// Create a separate event for search with no results to make it easier to filter by them.
+	const blocksNotFound = document.querySelectorAll( '.block-editor-inserter__no-results' ).length !== 0;
+	setSearchBlocks( { context, notFound: blocksNotFound } );
 
-	// Create a separate event for search with no results to make it easier to filter by them
-	const hasResults = document.querySelectorAll( '.block-editor-inserter__no-results' ).length === 0;
-	if ( hasResults ) {
-		return;
+	if ( blocksNotFound ) {
+		setSearchBlocksNotFound( { context } );
 	}
-
-	tracksRecordEvent( 'wpcom_block_picker_no_results', { search_term } );
 };
 
 /**
